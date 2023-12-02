@@ -12,95 +12,137 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class BlockView extends View {
-    private static final int BLOCK_SIZE = 200;
-    private static final int NUM_BLOCKS = 3;
+    private static final int BLOCK_SIZE = 100;
     private static final int BLOCK_GAP = 10;
-    private static final int DELAY_MILLIS = 100;
-    private static final int MAX_BLOCKS_ON_SCREEN = 10;
+    private static final int DELAY_MILLIS = 50;
 
     private Paint paint;
-    private List<int[]> blockPositionsList;
-    private int currentBlockDirection = 1;
+    private List<int[]> rows;
+    private int[] blockDirections;
+    private int numBlocks = 3;
     private Handler handler;
-    private int currentActiveBlockIndex = 0;
+    private boolean blocksMoving;
+    private int[] previousRow;
+    private EndGameListener endGameListener;
 
-    public BlockView(Context context) {
+    public interface EndGameListener {
+        void onGameEnded();
+    }
+
+    public BlockView(Context context, EndGameListener listener) {
         super(context);
+        this.endGameListener = listener;
         init();
     }
 
     private void init() {
         paint = new Paint();
         paint.setColor(Color.RED);
+        rows = new ArrayList<>();
         handler = new Handler(Looper.getMainLooper());
+        blockDirections = new int[numBlocks];
 
-        blockPositionsList = new ArrayList<>();
-        addNewBlock();  // Add the first block
-    }
-
-    private void addNewBlock() {
-        if (blockPositionsList.size() >= MAX_BLOCKS_ON_SCREEN) {
-            // Game over, reached the top
-            return;
+        int[] initialRow = new int[numBlocks];
+        for (int i = 0; i < numBlocks; i++) {
+            initialRow[i] = i * (BLOCK_SIZE + BLOCK_GAP);
+            blockDirections[i] = 1;
         }
+        rows.add(initialRow);
 
-        int[] blockPositions = new int[NUM_BLOCKS];
-        for (int i = 0; i < NUM_BLOCKS; i++) {
-            blockPositions[i] = i * (BLOCK_SIZE + BLOCK_GAP);
-        }
-        blockPositionsList.add(blockPositions);
-        currentActiveBlockIndex = blockPositionsList.size() - 1;
-        moveCurrentBlock();
-    }
-
-    @Override
-    public boolean onTouchEvent(MotionEvent event) {
-        if (event.getAction() == MotionEvent.ACTION_DOWN) {
-            addNewBlock();
-            return true;
-        }
-        return super.onTouchEvent(event);
+        blocksMoving = true;
+        postMoveBlocks();
     }
 
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
-
-        for (int blockIdx = 0; blockIdx < blockPositionsList.size(); blockIdx++) {
-            int[] blockPositions = blockPositionsList.get(blockIdx);
-            for (int pos : blockPositions) {
+        for (int[] row : rows) {
+            for (int i = 0; i < row.length; i++) {
                 canvas.drawRect(
-                        pos,
-                        getHeight() - (blockIdx + 1) * BLOCK_SIZE - blockIdx * BLOCK_GAP,
-                        pos + BLOCK_SIZE,
-                        getHeight() - blockIdx * (BLOCK_SIZE + BLOCK_GAP),
+                        row[i],
+                        getHeight() - BLOCK_SIZE - (BLOCK_SIZE + BLOCK_GAP) * rows.indexOf(row),
+                        row[i] + BLOCK_SIZE,
+                        getHeight() - (BLOCK_SIZE + BLOCK_GAP) * rows.indexOf(row),
                         paint
                 );
             }
         }
-
-        invalidate();
     }
 
-    private void moveCurrentBlock() {
-        if (currentActiveBlockIndex >= blockPositionsList.size()) {
-            return;
-        }
-        handler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                int[] currentBlockPositions = blockPositionsList.get(currentActiveBlockIndex);
-                for (int i = 0; i < NUM_BLOCKS; i++) {
-                    currentBlockPositions[i] += currentBlockDirection * 10;
+    private void postMoveBlocks() {
+        handler.postDelayed(this::moveBlocks, DELAY_MILLIS);
+    }
 
-                    if (currentBlockPositions[i] > getWidth() - BLOCK_SIZE || currentBlockPositions[i] < 0) {
-                        currentBlockDirection = -currentBlockDirection;
-                        break;
-                    }
-                }
-                invalidate();
-                moveCurrentBlock();
+    private void moveBlocks() {
+        if (!blocksMoving) return;
+        int[] currentRow = rows.get(rows.size() - 1);
+        for (int i = 0; i < numBlocks; i++) {
+            currentRow[i] += blockDirections[i] * (BLOCK_SIZE + BLOCK_GAP);
+            if (currentRow[i] >= getWidth() - BLOCK_SIZE || currentRow[i] <= 0) {
+                blockDirections[i] = -blockDirections[i];
             }
-        }, DELAY_MILLIS);
+        }
+        invalidate();
+        postMoveBlocks();
+    }
+
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        if (event.getAction() == MotionEvent.ACTION_DOWN && blocksMoving) {
+            stopBlocks();
+            checkAlignmentAndAddRow();
+            if (numBlocks == 1) {
+                endGame();
+            } else {
+                postMoveBlocks();
+            }
+            performClick();
+        }
+        return true;
+    }
+
+    private void stopBlocks() {
+        blocksMoving = false;
+        handler.removeCallbacksAndMessages(null);
+    }
+
+    private void checkAlignmentAndAddRow() {
+        int[] currentRow = rows.get(rows.size() - 1).clone();
+        if (rows.size() > 1) {
+            previousRow = rows.get(rows.size() - 2);
+            boolean isAligned = true;
+            for (int i = 0; i < numBlocks; i++) {
+                if (i >= previousRow.length || Math.abs(currentRow[i] - previousRow[i]) > BLOCK_GAP) {
+                    isAligned = false;
+                    break;
+                }
+            }
+            if (!isAligned && numBlocks > 1) {
+                numBlocks--;
+            } else if (!isAligned && numBlocks == 1) {
+                endGame();
+                return;
+            }
+        }
+
+        int[] nextRow = new int[numBlocks];
+        System.arraycopy(currentRow, 0, nextRow, 0, numBlocks);
+        rows.add(nextRow);
+        blockDirections = new int[numBlocks];
+        for (int i = 0; i < numBlocks; i++) {
+            blockDirections[i] = 1;
+        }
+        blocksMoving = true;
+    }
+
+    private void endGame() {
+        if (endGameListener != null) {
+            endGameListener.onGameEnded();
+        }
+    }
+
+    @Override
+    public boolean performClick() {
+        return super.performClick();
     }
 }
