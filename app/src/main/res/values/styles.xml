@@ -1,7 +1,7 @@
 <resources>
 
     <!-- Base application theme. -->
-    <style name="Theme.Stacker" parent="android:Theme.Material.Light.NoActionBar">
+    <style name="Theme.Stacker" parent="Theme.AppCompat.Light.NoActionBar">
         <!-- Use the colors defined in colors.xml -->
         <item name="colorPrimary">@color/purple_500</item>
         <item name="colorPrimaryDark">@color/purple_700</item>
@@ -13,15 +13,18 @@
     </style>
 
     <!-- Theme for activities without an action bar. -->
-    <style name="Theme.Stacker.NoActionBar" parent="Theme.Stacker">
+    <style name="Theme.Stacker.NoActionBar">
+        <!-- Inherits from Theme.Stacker which already has NoActionBar -->
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
         <!-- Other items to customize for this theme can go here -->
     </style>
 
-    <style name="Base.Theme.Stacker" parent="Theme.Material3.DayNight.NoActionBar">
-        <!-- Customize your dark theme here. -->
-        <!-- <item name="colorPrimary">@color/my_dark_primary</item> -->
-    </style>
+    <!-- As your app is not using Material3 themes, this can be removed or updated to AppCompat as well. -->
+    <!-- If you decide to keep this, make sure to change the parent to an AppCompat theme. -->
+    <!-- <style name="Base.Theme.Stacker" parent="Theme.AppCompat">
+        <item name="colorPrimary">@color/my_dark_primary</item>
+        <- Customize your dark theme here.-->
+    <!-- </style> -->
 
 </resources>

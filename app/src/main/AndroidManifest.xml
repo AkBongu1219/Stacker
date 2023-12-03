@@ -13,26 +13,31 @@
         android:theme="@style/Theme.Stacker"
         tools:targetApi="34">
 
+        <!-- Main Activity Declaration -->
+        <activity
+            android:name=".MainActivity"
+            android:label="@string/GameStart"
+            android:theme="@style/Theme.Stacker.NoActionBar"
+            android:exported="true" />
+
         <!-- Module Activity Declaration -->
         <activity
             android:name=".ModuleActivity"
-            android:exported="true"
             android:label="@string/Stack"
-            android:theme="@style/Theme.Stacker">
+            android:theme="@style/Theme.Stacker"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <!-- Main Activity Declaration -->
+
+        <!-- Other Activities -->
         <activity
-            android:name=".MainActivity"
-            android:exported="false"
-            android:label="@string/GameStart"
-            android:theme="@style/Theme.Stacker.NoActionBar" />
-
-        <activity android:name=".GameOverActivity"></activity>
-
+            android:name=".GameOverActivity"
+            android:exported="true"></activity>
+        <activity
+            android:name=".YouWin"
+            android:exported="true"></activity>
     </application>
-
 </manifest>

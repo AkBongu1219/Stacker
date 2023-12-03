@@ -1,28 +1,33 @@
-package com.example.stacker; // Add this package statement
+package com.example.stacker;
 
-import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
-import android.widget.Button;
+import androidx.appcompat.app.AppCompatActivity;
 
-public class ModuleActivity extends Activity {
+public class ModuleActivity extends AppCompatActivity {
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_module);
+    }
 
-        // Find the button by its ID
-        Button startGameButton = (Button) findViewById(R.id.buttonStartGame);
+    public void onDifficultySelected(View view) {
+        String difficulty;
+        int id = view.getId();
+        if (id == R.id.easy) {
+            difficulty = "Easy";
+        } else if (id == R.id.medium) {
+            difficulty = "Medium";
+        } else if (id == R.id.hard) {
+            difficulty = "Hard";
+        } else {
+            return; // Do nothing if the clicked view is not a difficulty button
+        }
 
-        // Set a click listener on that button
-        startGameButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                // Use an Intent to start the MainActivity
-                Intent intent = new Intent(ModuleActivity.this, MainActivity.class);
-                startActivity(intent);
-            }
-        });
+        Intent intent = new Intent(this, MainActivity.class);
+        intent.putExtra("difficulty", difficulty);
+        startActivity(intent);
     }
 }

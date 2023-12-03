@@ -29,9 +29,26 @@ public class BlockView extends View {
     private int[] blockDirections = {1, 1, 1}; // Initial directions for each block (1 for right, -1 for left)
     private Handler handler;
     private boolean blocksMoving;
-
     private AlertDialog.Builder alertDialogBuilder;
     private AlertDialog alertDialog;
+
+
+    public void setDifficulty(String difficulty) {
+        switch (difficulty) {
+            case "Easy":
+                this.accelerationFactor = 1.1; // Easy difficulty
+                break;
+            case "Medium":
+                this.accelerationFactor = 1.2; // Medium difficulty
+                break;
+            case "Hard":
+                this.accelerationFactor = 1.3; // Hard difficulty
+                break;
+            default:
+                this.accelerationFactor = 1.0; // Default to Easy if there's an error
+                break;
+        }
+    }
 
     public BlockView(Context context) {
         super(context);
