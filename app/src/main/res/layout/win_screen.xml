@@ -13,13 +13,13 @@
         android:gravity="center_horizontal">
 
         <TextView
-            android:id="@+id/gameOverText"
+            android:id="@+id/YouWinText"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Game Over"
+            android:text="You Win!"
             android:fontFamily="@font/arcade_font"
             android:textSize="60sp"
-            android:textColor="#ff4444"
+            android:textColor="#99cc00"
             android:textStyle="bold"/>
 
         <Button

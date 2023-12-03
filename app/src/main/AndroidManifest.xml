@@ -31,6 +31,8 @@
             android:label="@string/GameStart"
             android:theme="@style/Theme.Stacker.NoActionBar" />
 
+        <activity android:name=".GameOverActivity"></activity>
+
     </application>
 
 </manifest>
